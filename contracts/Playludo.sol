@@ -30,7 +30,7 @@ constructor() {
         require(msg.sender == players[currentTurn].playersAddress, "Not your turn");
 
         // Generate a pseudorandom number between 1 and 6
-        uint256 randomNumber = (uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, currentTurn, msg.sender))) % 6) + 1;
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, currentTurn, msg.sender))) % 6 + 1;
 
         // Move the player
         movePlayer(randomNumber);
@@ -41,10 +41,10 @@ constructor() {
         playerdetails storage player = players[currentTurn];
 
         // If the player hasn't started, they need to roll a 6 to start
-        if (!player.hasStarted) {
+        if (!player.hasstarted) {
             require(steps == 6, "Need to roll a 6 to start");
-            player.hasStarted = true; // Player starts moving
-            player.position += 1; // Move to the starting position
+            player.hasstarted = true; // Player starts moving
+            player.positions += 1; // Move to the starting position
         } else {
             player.position += steps; // Move the player
         }
