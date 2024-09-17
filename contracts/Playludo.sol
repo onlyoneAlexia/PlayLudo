@@ -8,37 +8,37 @@ struct playerdetails{
 address playersAddress;
 uint256 positions; //this holds the turns/ position of players
 bool hasstarted;
-};
- event PlayerJoined(address indexed player, uint256 number);
-    event DiceRolled(address indexed player, uint256 newPosition);
-    event GameWon(address indexed player);
+}
 
-    constructor() {
-        currentTurn = 0; // Start with the first player
-        totalPlayers = 0; // Initialize total players
-    }
- function joinGame() public {
+
+playerdetails[] public players; // Declare players array
+uint256 public currentTurn; // Declare currentTurn variable
+uint256 public totalPlayers; // Declare totalPlayers variable
+ uint256 public constant WINNING_POSITION = 56; // Winning position on the board
+
+constructor() {
+    currentTurn = 0; // Start with the first player
+    totalPlayers = 0; // Initialize total players
+}
+    function joinGame() public {
         require(totalPlayers < 4, "Maximum players reached");
-        players.push(Player(msg.sender, 0, false));
+        players.push(playerdetails(msg.sender, 0, false));
         totalPlayers++;
-        emit PlayerJoined(msg.sender);
-    }
+        }
 
     function rollDice() public returns (uint256) {
-        require(msg.sender == players[currentTurn].playerAddress, "Not your turn");
+        require(msg.sender == players[currentTurn].playersAddress, "Not your turn");
 
         // Generate a pseudorandom number between 1 and 6
         uint256 randomNumber = (uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, currentTurn, msg.sender))) % 6) + 1;
 
         // Move the player
         movePlayer(randomNumber);
-
-        emit DiceRolled(msg.sender, randomNumber);
         return randomNumber;
     }
 
     function movePlayer(uint256 steps) internal {
-        Player storage player = players[currentTurn];
+        playerdetails storage player = players[currentTurn];
 
         // If the player hasn't started, they need to roll a 6 to start
         if (!player.hasStarted) {
@@ -52,11 +52,8 @@ bool hasstarted;
         // Check for winning condition
         if (player.position >= WINNING_POSITION) {
             player.position = WINNING_POSITION; // Set to winning position
-            emit GameWon(msg.sender);
+
         }
-
-        emit PlayerMoved(msg.sender, player.position);
-
         // Move to the next player
         currentTurn = (currentTurn + 1) % totalPlayers;
     }
@@ -69,14 +66,4 @@ bool hasstarted;
         }
         revert("Player not found");
     }
-
-    function getCurrentPlayer() public view returns (address) {
-        return players[currentTurn].playerAddress;
-    }
-
-    function getTotalPlayers() public view returns (uint256) {
-        return totalPlayers;
-    }
-}
-
 }
